@@ -1,10 +1,11 @@
 apiVersion: 1
 datasources:
   - name: MySQL
+    uid: dfjwx3aqxdam8a
     type: mysql
     url: bxa3nz7gedsjlro8pmnx-mysql.services.clever-cloud.com:3306
     database: bxa3nz7gedsjlro8pmnx
     user: uiurmwccxfzoehb1
     secureJsonData:
-      password: GNJAwVKNTUbAwurZxTjJ
+      password: ${GRAFANA_PASSWORD}
     editable: true
