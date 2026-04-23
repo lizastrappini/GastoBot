@@ -569,7 +569,7 @@
   		"text": "",
  		 "value": ""
 		},
-          "hide": "hideVariable",
+          "hide": "dontHide",
           "refresh": "onDashboardLoad",
           "skipUrlSync": false,
           "query": {
