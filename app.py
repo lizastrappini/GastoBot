@@ -15,6 +15,9 @@ app.config["SQLALCHEMY_DATABASE_URI"] = (
 )
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
+GRAFANA_URL = os.getenv("GRAFANA_URL")  
+GRAFANA_DASHBOARD_ID = os.getenv("GRAFANA_DASHBOARD_ID") 
+
 db.init_app(app)
 
 from Model import Usuario, Categoria, Gasto
@@ -23,11 +26,14 @@ TOKEN = os.getenv("TELEGRAM_TOKEN")
 TELEGRAM_API = f"https://api.telegram.org/bot{TOKEN}"
 
 
-def enviarMensaje(chat_id, texto):
-    requests.post(f"{TELEGRAM_API}/sendMessage", json={
+def enviarMensaje(chat_id, texto, parse_mode=None):
+    payload = {
         "chat_id": chat_id,
         "text": texto
-    })
+    }
+    if parse_mode:
+        payload["parse_mode"] = parse_mode
+    requests.post(f"{TELEGRAM_API}/sendMessage", json=payload)
 
 def getUsuario(chat_id, nombre):
     usuario = Usuario.query.filter_by(IdChat=chat_id).first()
@@ -125,6 +131,11 @@ def baja(usuario, chat_id):
     db.session.commit()
     enviarMensaje(chat_id, "Lamentamos que te vayas 😢. Si cambias de opinión, siempre podés volver a escribir /start")
 
+def generarLinkDashboard(usuario):
+    link = f"{GRAFANA_URL}/d/{GRAFANA_DASHBOARD_ID}/gastos?var-Usuario={usuario.IdChat}&kiosk=tv"
+    usuario.LinkDashboard = link
+    db.session.commit()
+    return link
 
 @app.route("/webhook", methods=["POST"])
 def webhook():
@@ -146,6 +157,7 @@ def webhook():
         return jsonify({}), 200
 
     if texto.startswith("/start"):
+        generarLinkDashboard(usuario)
         enviarMensaje(chat_id, 
         f"¡Hola {nombre}! 👋\n\n"
         "Bienvenido a MisGastos, tu asistente personal de finanzas 💸\n\n"
@@ -153,6 +165,7 @@ def webhook():
         "/gasto 100.50 comida — registrar un gasto\n"
         "/gastos — ver tus últimos gastos\n"
         "/categorias — ver tus categorías\n\n"
+        "/midashboard — ver un dashboard con tus gastos\n\n"
         "/baja — para dejar de usar el bot\n\n"
         "Para crear una nueva categoría, simplemente usala al registrar un gasto. Si la categoría no existe, se creará automáticamente!\n\n"
         "¡Empecemos a ordenar tus finanzas! 🚀"
@@ -166,6 +179,10 @@ def webhook():
         categorias(usuario, chat_id)
     elif texto.startswith("/baja"):
         baja(usuario, chat_id)
+    elif texto.startswith("/midashboard"):
+        if not usuario.LinkDashboard:
+            generarLinkDashboard(usuario)
+        enviarMensaje(chat_id, f'📊 <a href="{usuario.LinkDashboard}">Ver mi dashboard</a>', parse_mode="HTML")
     else:
         enviarMensaje(chat_id, "No pude entender el mensaje 🧐\nTe dejo los comandos disponibles:\n/gasto Ejemplo: 100.50 comida\n/gastos\n/categorias")
 
@@ -173,8 +190,7 @@ def webhook():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
-
+    app.run(host="0.0.0.0", port=5000, debug=False)
 
 #TO-DO
 # - Agregar comando /categorias para listar categorías del usuario  -- OK
