@@ -7,5 +7,5 @@ datasources:
     database: bxa3nz7gedsjlro8pmnx
     user: uiurmwccxfzoehb1
     secureJsonData:
-      password: ${GRAFANA_PASSWORD}
+      password: ${GF_MYSQL_PASSWORD}
     editable: true
