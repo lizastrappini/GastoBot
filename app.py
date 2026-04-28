@@ -124,7 +124,7 @@ def categorias(usuario, chat_id):
     enviarMensaje(chat_id, texto)
 
 def baja(usuario, chat_id):
-    usuario.FechaBaja = datetime.now()
+    usuario.FechaBaja = datetime.utcnow()
     db.session.commit()
     enviarMensaje(chat_id, "Lamentamos que te vayas 😢. Si cambias de opinión, siempre podés volver a escribir /start")
 
