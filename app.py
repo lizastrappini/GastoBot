@@ -35,7 +35,7 @@ def enviarMensaje(chat_id, texto, parse_mode=None):
         payload["parse_mode"] = parse_mode
     requests.post(f"{TELEGRAM_API}/sendMessage", json=payload)
 
-def getUsuario(chat_id, nombre):
+def getUsuario(chat_id):
     usuario = Usuario.query.filter_by(IdChat=chat_id).first()
     return usuario
 
