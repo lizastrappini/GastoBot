@@ -35,16 +35,6 @@ def enviarMensaje(chat_id, texto, parse_mode=None):
         payload["parse_mode"] = parse_mode
     requests.post(f"{TELEGRAM_API}/sendMessage", json=payload)
 
-"""def getUsuario(chat_id):
-    usuario = Usuario.query.filter_by(IdChat=chat_id).first()
-    return usuario
-
-def nuevoUsuario(chat_id, nombre):
-    usuario = Usuario(Nombre = nombre, IdChat = chat_id, IdTipo=1)
-    db.session.add(usuario)
-    db.session.commit()
-    return usuario"""
-
 def getOrCreateUsuario(chat_id, nombre):
     usuario = Usuario.query.filter_by(IdChat=chat_id).first()
     
@@ -91,11 +81,6 @@ def nuevoGasto(usuario, chat_id, args):
     if existe:
         enviarMensaje(chat_id, "✋ Ya registraste un gasto por el mismo monto y categoria hace menos de 1 minuto! Verificá tus gastos recientes")
         return
-    
-    if monto <= 0:
-        enviarMensaje(chat_id, "🚫 El monto debe ser un número positivo")
-        return
-    
 
     gasto = Gasto(IdCategoria=categoria.Id, Monto=monto, IdUsuario=usuario.Id)
     db.session.add(gasto)
