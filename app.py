@@ -158,7 +158,7 @@ def webhook():
     nombre = data["message"]["chat"].get("first_name", "Sin nombre")
     texto = data["message"]["text"].strip().lower()
 
-    usuario = getUsuario(chat_id, nombre)
+    usuario = getOrCreateUsuario(chat_id, nombre)
     
     if not usuario:
         usuario = nuevoUsuario(chat_id, nombre)
