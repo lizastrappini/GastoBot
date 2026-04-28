@@ -299,7 +299,7 @@
                         "editorMode": "code",
                         "format": "table",
                         "rawQuery": true,
-                        "rawSql": "SELECT SUM(g.Monto) as Total\r\nFROM Gastos g\r\nJOIN Usuario u ON g.IdUsuario = u.Id\r\nWHERE u.Idchat = '${Usuario}'\r\nAND g.Fecha >= DATE_SUB(NOW(), INTERVAL 1 MONTH)",
+                        "rawSql": "SELECT SUM(g.Monto) as Total\r\nFROM Gastos g\r\nJOIN Usuario u ON g.IdUsuario = u.Id\r\nWHERE u.IdChat = '${Usuario}'\r\nAND g.Fecha >= DATE_SUB(NOW(), INTERVAL 1 MONTH)",
                         "sql": {
                           "columns": [
                             {
