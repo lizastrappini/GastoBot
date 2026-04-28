@@ -55,7 +55,7 @@ def getOrCreateUsuario(chat_id, nombre):
     
     return usuario
 
-def getCategoria(nombre, id_usuario):
+def getOrCreateCategoria(nombre, id_usuario):
     nombre = nombre.strip().lower()
     categoria = Categoria.query.filter(db.func.lower(Categoria.Nombre) == nombre, Categoria.IdUsuario == id_usuario).first()
     
@@ -82,7 +82,7 @@ def nuevoGasto(usuario, chat_id, args):
         enviarMensaje(chat_id, "🚫 Debés indicar una categoría")
         return
     
-    categoria = getCategoria(categoria_nombre, usuario.Id)
+    categoria = getOrCreateCategoria(categoria_nombre, usuario.Id)
 
     hace_un_minuto = datetime.utcnow() - timedelta(minutes=1)
     
