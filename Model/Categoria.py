@@ -6,3 +6,7 @@ class Categoria(db.Model):
     Nombre = db.Column(db.String(50), nullable=False)
     IdUsuario = db.Column(db.Integer, db.ForeignKey("Usuario.Id"), nullable=False)
     gastos = db.relationship("Gasto", backref="categoria", lazy=True)
+
+    __table_args__ = (
+        db.UniqueConstraint('Nombre', 'IdUsuario', name='uq_categoria_usuario'),
+    )
