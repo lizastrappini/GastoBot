@@ -60,7 +60,7 @@ def nuevoGasto(usuario, chat_id, args):
         partes = args.split(" ", 1)
         monto = float(partes[0])
         categoria_nombre = partes[1].strip().lower()
-    except:
+    except (ValueError, IndexError):
         enviarMensaje(chat_id, "🚫 Formato incorrecto. Usá: /gasto 100.50 comida")
         return
 
@@ -76,10 +76,12 @@ def nuevoGasto(usuario, chat_id, args):
 
     hace_un_minuto = datetime.utcnow() - timedelta(minutes=1)
     
-    existe = Gasto.query.filter(db.func.abs(db.cast(Gasto.Monto, db.Float) - monto) < 0.001, Gasto.IdUsuario == usuario.Id, Gasto.IdCategoria == categoria.Id,Gasto.Fecha >= hace_un_minuto).first()
+    existe = Gasto.query.filter(db.func.abs(db.cast(Gasto.Monto, db.Float) - monto) < 0.001,
+    Gasto.IdUsuario == usuario.Id, Gasto.IdCategoria == categoria.Id,Gasto.Fecha >= hace_un_minuto).first()
     
     if existe:
-        enviarMensaje(chat_id, "✋ Ya registraste un gasto por el mismo monto y categoria hace menos de 1 minuto! Verificá tus gastos recientes")
+        enviarMensaje(chat_id, 
+        "✋ Ya registraste un gasto por el mismo monto y categoria hace menos de 1 minuto! Verificá tus gastos recientes")
         return
 
     gasto = Gasto(IdCategoria=categoria.Id, Monto=monto, IdUsuario=usuario.Id)
