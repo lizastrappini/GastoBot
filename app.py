@@ -35,7 +35,7 @@ def enviarMensaje(chat_id, texto, parse_mode=None):
         payload["parse_mode"] = parse_mode
     requests.post(f"{TELEGRAM_API}/sendMessage", json=payload)
 
-def getUsuario(chat_id):
+"""def getUsuario(chat_id):
     usuario = Usuario.query.filter_by(IdChat=chat_id).first()
     return usuario
 
@@ -43,6 +43,16 @@ def nuevoUsuario(chat_id, nombre):
     usuario = Usuario(Nombre = nombre, IdChat = chat_id, IdTipo=1)
     db.session.add(usuario)
     db.session.commit()
+    return usuario"""
+
+def getOrCreateUsuario(chat_id, nombre):
+    usuario = Usuario.query.filter_by(IdChat=chat_id).first()
+    
+    if not usuario:
+        usuario = Usuario(Nombre=nombre, IdChat=chat_id, IdTipo=1)
+        db.session.add(usuario)
+        db.session.commit()
+    
     return usuario
 
 def getCategoria(nombre, id_usuario):
