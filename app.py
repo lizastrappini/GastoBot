@@ -144,12 +144,10 @@ def webhook():
     chat_id = data["message"]["chat"]["id"]
     nombre = data["message"]["chat"].get("first_name", "Sin nombre")
     texto = data["message"]["text"].strip().lower()
-
-    usuario = getOrCreateUsuario(chat_id, nombre)
     
-    if not usuario:
-        usuario = nuevoUsuario(chat_id, nombre)
-    elif usuario.FechaBaja is not None and not texto.startswith("/start"):
+    usuario = getOrCreateUsuario(chat_id, nombre)
+
+    if usuario.FechaBaja is not None and not texto.startswith("/start"):
         enviarMensaje(chat_id, "Diste de baja nuestro bot 😭. Si querés volver a usarlo, simplemente escribe /start")
         return jsonify({}), 200
 
