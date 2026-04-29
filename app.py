@@ -180,7 +180,7 @@ def webhook():
     elif texto.startswith("/midashboard"):
         if not usuario.LinkDashboard:
             generarLinkDashboard(usuario)
-        enviarMensaje(chat_id, usuario.LinkDashboard)
+        enviarMensaje(chat_id, f'📊 <a href="{usuario.LinkDashboard}">Ver mi dashboard</a>', parse_mode="HTML")
     else:
         enviarMensaje(chat_id, "No pude entender el mensaje 🧐\nTe dejo los comandos disponibles:\n/gasto Ejemplo: 100.50 comida\n/gastos\n/categorias")
 
