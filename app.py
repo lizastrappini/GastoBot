@@ -243,6 +243,9 @@ if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
 
 #TO-DO
+# - Agregar comando /categorias para listar categorías del usuario  -- OK
 # - Mejorar manejo de errores y validación de comandos
 # - Agregar comando /resumen para mostrar resumen mensual de gastos por categoría
-# - Agregar comando /eliminar para eliminar un gasto por ID o fecha
+# - Validar montos y duplicados -- OK
+# - Validar que no se repitan categorias para 1 mismo usuario o que no sean similares o con nombres vacios --OK
+# - Agregar comando /eliminar para eliminar un gasto por ID o fecha --OK
