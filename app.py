@@ -133,8 +133,6 @@ def eliminarPorId(usuario, chat_id, gasto_id):
 
     enviarMensaje(chat_id, f"🗑️ Gasto #{gasto_id} eliminado correctamente")
 
-from datetime import datetime
-
 def eliminarPorFecha(usuario, chat_id, fecha_str):
     try:
         fecha = datetime.strptime(fecha_str, "%Y-%m-%d")
@@ -168,6 +166,42 @@ def categorias(usuario, chat_id):
     texto = "🗒️ Tus categorías:\n\n"
     for c in lista:
         texto += f"• {c.Nombre}\n"
+    enviarMensaje(chat_id, texto)
+
+from datetime import datetime
+
+def resumen(usuario, chat_id):
+    hoy = datetime.utcnow()
+    inicio_mes = datetime(hoy.year, hoy.month, 1)
+
+    resultados = (
+        db.session.query(
+            Categoria.Nombre,
+            db.func.sum(Gasto.Monto)
+        )
+        .join(Gasto, Gasto.IdCategoria == Categoria.Id)
+        .filter(
+            Gasto.IdUsuario == usuario.Id,
+            Gasto.Fecha >= inicio_mes
+        )
+        .group_by(Categoria.Nombre)
+        .order_by(db.func.sum(Gasto.Monto).desc())
+        .all()
+    )
+
+    if not resultados:
+        enviarMensaje(chat_id, "📊 No tenés gastos registrados este mes")
+        return
+
+    texto = "📊 Resumen mensual:\n\n"
+    total_general = 0
+
+    for nombre, total in resultados:
+        texto += f"• {nombre}: ${total:.2f}\n"
+        total_general += total
+
+    texto += f"\n💰 Total del mes: ${total_general:.2f}"
+
     enviarMensaje(chat_id, texto)
 
 def baja(usuario, chat_id):
@@ -213,6 +247,7 @@ def webhook():
         "/eliminar YYYY-MM-DD — eliminar gastos por fecha (ej: /eliminar 2026-04-29)\n"
         "/categorias — ver tus categorías\n\n"
         "/midashboard — ver un dashboard con tus gastos\n\n"
+        "/resumen — ver resumen mensual por categoría 📊\n"
         "/baja — para dejar de usar el bot\n\n"
         "Para crear una nueva categoría, simplemente usala al registrar un gasto. Si la categoría no existe, se creará automáticamente!\n\n"
         "¡Empecemos a ordenar tus finanzas! 🚀"
@@ -227,6 +262,8 @@ def webhook():
         eliminarGasto(usuario, chat_id, args)
     elif texto.startswith("/categorias"):
         categorias(usuario, chat_id)
+    elif texto.startswith("/resumen"):
+        resumen(usuario, chat_id)
     elif texto.startswith("/baja"):
         baja(usuario, chat_id)
     elif texto.startswith("/midashboard"):
@@ -245,7 +282,7 @@ if __name__ == "__main__":
 #TO-DO
 # - Agregar comando /categorias para listar categorías del usuario  -- OK
 # - Mejorar manejo de errores y validación de comandos
-# - Agregar comando /resumen para mostrar resumen mensual de gastos por categoría
+# - Agregar comando /resumen para mostrar resumen mensual de gastos por categoría -- OK
 # - Validar montos y duplicados -- OK
 # - Validar que no se repitan categorias para 1 mismo usuario o que no sean similares o con nombres vacios --OK
 # - Agregar comando /eliminar para eliminar un gasto por ID o fecha --OK
