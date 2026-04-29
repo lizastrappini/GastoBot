@@ -105,11 +105,58 @@ def gastos(usuario, chat_id):
     texto = "Últimos gastos:\n\n"
     total = 0
     for g in lista:
-        texto += f"• {g.Fecha.strftime('%d/%m %H:%M')} — {g.categoria.Nombre}: ${g.Monto}\n"
+        texto += f"• #{g.Id} | {g.Fecha.strftime('%d/%m %H:%M')} — {g.categoria.Nombre}: ${g.Monto}\n"
         total += g.Monto
 
     texto += f"\nTotal: ${total:.2f}"
     enviarMensaje(chat_id, texto)
+
+def eliminarGasto(usuario, chat_id, args):
+    if not args:
+        enviarMensaje(chat_id, "❌ Usá:\n/eliminar ID\n/eliminar YYYY-MM-DD")
+        return
+
+    if args.isdigit():
+        eliminarPorId(usuario, chat_id, int(args))
+    else:
+        eliminarPorFecha(usuario, chat_id, args)
+
+def eliminarPorId(usuario, chat_id, gasto_id):
+    gasto = Gasto.query.filter_by(Id=gasto_id, IdUsuario=usuario.Id).first()
+
+    if not gasto:
+        enviarMensaje(chat_id, "❌ No se encontró el gasto")
+        return
+
+    db.session.delete(gasto)
+    db.session.commit()
+
+    enviarMensaje(chat_id, f"🗑️ Gasto #{gasto_id} eliminado correctamente")
+
+from datetime import datetime
+
+def eliminarPorFecha(usuario, chat_id, fecha_str):
+    try:
+        fecha = datetime.strptime(fecha_str, "%Y-%m-%d")
+    except:
+        enviarMensaje(chat_id, "❌ Formato inválido. Usá YYYY-MM-DD")
+        return
+
+    gastos = Gasto.query.filter(
+        Gasto.IdUsuario == usuario.Id,
+        db.func.date(Gasto.Fecha) == fecha.date()
+    ).all()
+
+    if not gastos:
+        enviarMensaje(chat_id, "❌ No hay gastos en esa fecha")
+        return
+
+    for g in gastos:
+        db.session.delete(g)
+
+    db.session.commit()
+
+    enviarMensaje(chat_id, f"🗑️ Se eliminaron {len(gastos)} gastos del {fecha_str}")
 
 def categorias(usuario, chat_id):
     lista = Categoria.query.filter_by(IdUsuario=usuario.Id).order_by(Categoria.Nombre).all()
@@ -162,6 +209,7 @@ def webhook():
         "Desde acá podés registrar tus gastos fácilmente:\n\n"
         "/gasto 100.50 comida — registrar un gasto\n"
         "/gastos — ver tus últimos gastos\n"
+        "/eliminar — eliminar un gasto\n"
         "/categorias — ver tus categorías\n\n"
         "/midashboard — ver un dashboard con tus gastos\n\n"
         "/baja — para dejar de usar el bot\n\n"
@@ -173,6 +221,9 @@ def webhook():
         nuevoGasto(usuario, chat_id, args)
     elif texto.startswith("/gastos"):
         gastos(usuario, chat_id)
+    elif texto.startswith("/eliminar"):
+        args = texto[len("/eliminar"):].strip()
+        eliminarGasto(usuario, chat_id, args)
     elif texto.startswith("/categorias"):
         categorias(usuario, chat_id)
     elif texto.startswith("/baja"):
@@ -191,9 +242,6 @@ if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=False)
 
 #TO-DO
-# - Agregar comando /categorias para listar categorías del usuario  -- OK
 # - Mejorar manejo de errores y validación de comandos
 # - Agregar comando /resumen para mostrar resumen mensual de gastos por categoría
-# - Validar montos y duplicados -- OK
-# - Validar que no se repitan categorias para 1 mismo usuario o que no sean similares o con nombres vacios --OK
 # - Agregar comando /eliminar para eliminar un gasto por ID o fecha
