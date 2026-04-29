@@ -36,7 +36,7 @@ def enviarMensaje(chat_id, texto, parse_mode=None):
     requests.post(f"{TELEGRAM_API}/sendMessage", json=payload)
 
 def getOrCreateUsuario(chat_id, nombre):
-    usuario = Usuario.query.filter_by(IdChat=chat_id, FechaBaja=None).first()
+    usuario = Usuario.query.filter_by(IdChat=chat_id).first()
     
     if not usuario:
         usuario = Usuario(Nombre=nombre, IdChat=chat_id, IdTipo=1)
@@ -152,6 +152,9 @@ def webhook():
         return jsonify({}), 200
 
     if texto.startswith("/start"):
+        if usuario.FechaBaja is not None:
+            usuario.FechaBaja = None
+            db.session.commit()
         generarLinkDashboard(usuario)
         enviarMensaje(chat_id, 
         f"¡Hola {nombre}! 👋\n\n"
